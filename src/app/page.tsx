@@ -21,14 +21,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface BinData {
@@ -67,6 +60,7 @@ export default function Home() {
       const data = await response.json();
       console.log(data);
       setBinData(data);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("An error occurred while fetching BIN data");
     } finally {
@@ -99,7 +93,7 @@ export default function Home() {
             <ul className="list-disc list-inside mt-2">
               <li>Identify the card brand (Visa, Mastercard, etc.)</li>
               <li>Determine the issuing bank</li>
-              <li>Verify the card's validity</li>
+              <li>Verify the card&apos;s validity</li>
             </ul>
             <p className="mt-2">
               <strong>Luhn Algorithm:</strong> Most credit card numbers are
@@ -117,6 +111,7 @@ export default function Home() {
               placeholder="Enter 6/8-digit BIN"
               minLength={6}
               maxLength={8}
+              min={0}
               className="flex-grow"
             />
             <Button type="submit" disabled={loading}>
@@ -188,7 +183,7 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <p className="mb-2">
-              Here's how you can use our API to fetch BIN information:
+              Here&apos;s how you can use our API to fetch BIN information:
             </p>
             <Tabs defaultValue="curl" className="w-full">
               <TabsList>
@@ -216,8 +211,9 @@ export default function Home() {
                   </Button>
                   <pre className="whitespace-pre-wrap break-all text-sm">
                     <code>
-                      curl -X GET "https://data.handyapi.com/bin/123456" \ -H
-                      "Authorization: Bearer YOUR_API_KEY"
+                      curl -X GET
+                      &quot;https://data.handyapi.com/bin/123456&quot; \ -H
+                      &quot;Authorization: Bearer YOUR_API_KEY&quot;
                     </code>
                   </pre>
                 </div>
@@ -302,10 +298,10 @@ print(data)`}
               </TabsContent>
             </Tabs>
             <p className="mt-2 text-sm text-muted-foreground">
-              Replace "123456" with the BIN you want to look up, and
-              "YOUR_API_KEY" with your actual API key.
+              Replace &quot;123456&quot; with the BIN you want to look up, and
+              &quot;YOUR_API_KEY&quot; with your actual API key.
             </p>
-            <Alert variant="warning" className="mt-4">
+            <Alert variant="default" className="mt-4">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>API Usage Disclaimer</AlertTitle>
               <AlertDescription>
