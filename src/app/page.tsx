@@ -16,28 +16,19 @@ import {
   CreditCard,
   Building,
   Globe,
-  BanknoteIcon,
   Copy,
   CheckCircle2,
+  Code,
+  GlobeLock,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface BinData {
-  Scheme: string;
-  Type: string;
-  Brand: string;
-  Country: {
-    Name: string;
-  };
-  Issuer: string;
-  Luhn: boolean;
-}
+import { BinLookUpResponse, getBinUseCase } from "@/lib/getBin.usecase";
 
 export default function Home() {
   const [bin, setBin] = useState("");
-  const [binData, setBinData] = useState<BinData | null>(null);
+  const [binData, setBinData] = useState<BinLookUpResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
@@ -55,12 +46,12 @@ export default function Home() {
     }
 
     try {
-      const response = await fetch(`https://data.handyapi.com/bin/${bin}`);
-      if (!response.ok) throw new Error("Failed to fetch BIN data");
-      const data = await response.json();
-      console.log(data);
-      setBinData(data);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const data = await getBinUseCase(Number(bin));
+      if (data) {
+        setBinData(data);
+      } else {
+        setError("BIN is not found. Please check the input and try again.");
+      }
     } catch (err) {
       setError("An error occurred while fetching BIN data");
     } finally {
@@ -138,38 +129,40 @@ export default function Home() {
                   <TableBody>
                     <TableRow className="border-b">
                       <TableCell className="font-medium flex items-center">
-                        <CreditCard className="mr-2 h-4 w-4" />
+                        <GlobeLock className="mr-2 h-4 w-4" />
                         Scheme/Network
                       </TableCell>
-                      <TableCell>{binData.Scheme}</TableCell>
+                      <TableCell>{binData.scheme || "N/A"}</TableCell>
+                    </TableRow>
+                    <TableRow className="border-b">
+                      <TableCell className="font-medium flex items-center">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Type
+                      </TableCell>
+                      <TableCell>{binData.type || "N/A"}</TableCell>
                     </TableRow>
                     <TableRow className="border-b">
                       <TableCell className="font-medium flex items-center">
                         <Building className="mr-2 h-4 w-4" />
-                        Type
-                      </TableCell>
-                      <TableCell>{binData.Type}</TableCell>
-                    </TableRow>
-                    <TableRow className="border-b">
-                      <TableCell className="font-medium flex items-center">
-                        <CreditCard className="mr-2 h-4 w-4" />
                         Issuer
                       </TableCell>
-                      <TableCell>{binData.Issuer || "N/A"}</TableCell>
+                      <TableCell>{binData.issuer || "N/A"}</TableCell>
                     </TableRow>
                     <TableRow className="border-b">
                       <TableCell className="font-medium flex items-center">
                         <Globe className="mr-2 h-4 w-4" />
                         Country
                       </TableCell>
-                      <TableCell>{binData.Country.Name}</TableCell>
+                      <TableCell>
+                        {binData.country?.iso_country || "N/A"}
+                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="font-medium flex items-center">
-                        <BanknoteIcon className="mr-2 h-4 w-4" />
+                        <Code className="mr-2 h-4 w-4" />
                         Luhn
                       </TableCell>
-                      <TableCell>{binData.Luhn ? "Yes" : "N/A"}</TableCell>
+                      <TableCell>{binData.luhn ? "Yes" : "N/A"}</TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>
@@ -199,7 +192,7 @@ export default function Home() {
                     className="absolute top-2 right-2"
                     onClick={() =>
                       copyToClipboard(
-                        'curl -X GET "https://data.handyapi.com/bin/123456" -H "Authorization: Bearer YOUR_API_KEY"'
+                        'curl -X GET "https://bin.efcanela.com/api/:bin"'
                       )
                     }
                   >
@@ -211,9 +204,7 @@ export default function Home() {
                   </Button>
                   <pre className="whitespace-pre-wrap break-all text-sm">
                     <code>
-                      curl -X GET
-                      &quot;https://data.handyapi.com/bin/123456&quot; \ -H
-                      &quot;Authorization: Bearer YOUR_API_KEY&quot;
+                      curl -X GET &quot;https://bin.efcanela.com/api/:bin&quot;
                     </code>
                   </pre>
                 </div>
@@ -225,11 +216,7 @@ export default function Home() {
                     size="icon"
                     className="absolute top-2 right-2"
                     onClick={() =>
-                      copyToClipboard(`fetch('https://data.handyapi.com/bin/123456', {
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
-  }
-})
+                      copyToClipboard(`fetch('https://bin.efcanela.com/api/:bin')
 .then(response => response.json())
 .then(data => console.log(data))
 .catch(error => console.error('Error:', error));`)
@@ -243,11 +230,7 @@ export default function Home() {
                   </Button>
                   <pre className="whitespace-pre-wrap break-all text-sm">
                     <code>
-                      {`fetch('https://data.handyapi.com/bin/123456', {
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY'
-  }
-})
+                      {`fetch('https://bin.efcanela.com/api/:bin')
 .then(response => response.json())
 .then(data => console.log(data))
 .catch(error => console.error('Error:', error));`}
@@ -264,12 +247,9 @@ export default function Home() {
                     onClick={() =>
                       copyToClipboard(`import requests
 
-url = "https://data.handyapi.com/bin/123456"
-headers = {
-    "Authorization": "Bearer YOUR_API_KEY"
-}
+url = "https://bin.efcanela.com/api/:bin"
 
-response = requests.get(url, headers=headers)
+response = requests.get(url)
 data = response.json()
 print(data)`)
                     }
@@ -284,12 +264,9 @@ print(data)`)
                     <code>
                       {`import requests
 
-url = "https://data.handyapi.com/bin/123456"
-headers = {
-    "Authorization": "Bearer YOUR_API_KEY"
-}
+url = "https://bin.efcanela.com/api/:bin"
 
-response = requests.get(url, headers=headers)
+response = requests.get(url)
 data = response.json()
 print(data)`}
                     </code>
@@ -298,8 +275,7 @@ print(data)`}
               </TabsContent>
             </Tabs>
             <p className="mt-2 text-sm text-muted-foreground">
-              Replace &quot;123456&quot; with the BIN you want to look up, and
-              &quot;YOUR_API_KEY&quot; with your actual API key.
+              Replace &quot;:bin&quot; with the BIN you want to look up.
             </p>
             <Alert variant="default" className="mt-4">
               <AlertCircle className="h-4 w-4" />
@@ -315,7 +291,10 @@ print(data)`}
           </CardContent>
         </Card>
         <footer className="mt-8 text-center text-sm text-muted-foreground">
-          Made with ❤️ by Esteban Canela
+          Made with ❤️{" "}
+          <a href="mailto:estebancanela@gmail.com?subject=BIN Lookup">
+            by Esteban Canela
+          </a>
         </footer>
       </CardContent>
     </div>
