@@ -1,6 +1,6 @@
 "use server";
 
-import { ColumnType, Generated, Selectable } from "kysely";
+import { ColumnType, Generated, Selectable, Updateable } from "kysely";
 import { db } from "./database";
 import { BinLookUpResponse } from "./getBin.usecase";
 
@@ -26,6 +26,7 @@ export interface BinbaseTable {
 }
 
 export type Binbase = Selectable<BinbaseTable>;
+export type BinbaseUpdate = Updateable<BinbaseTable>;
 
 export async function updateRow(
   originalData: Binbase,
@@ -42,7 +43,6 @@ export async function updateRow(
       isoa2: data.country?.iso_a2 || originalData.isoa2,
       isoa3: data.country?.iso_a3 || originalData.isoa3,
       isonumber: data.country?.iso_number || originalData.isonumber,
-      updated_at: new Date(),
     })
     .where("id", "=", originalData.id)
     .executeTakeFirst();

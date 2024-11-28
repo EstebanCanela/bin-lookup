@@ -52,6 +52,7 @@ export default function Home() {
       } else {
         setError("BIN is not found. Please check the input and try again.");
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError("An error occurred while fetching BIN data");
     } finally {

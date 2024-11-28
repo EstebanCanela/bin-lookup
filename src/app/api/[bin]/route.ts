@@ -3,13 +3,9 @@
 import { z } from "zod";
 import { getBinUseCase } from "@/lib/getBin.usecase";
 
-interface RouteParams {
-  bin: string;
-}
-
 export async function GET(
   request: Request,
-  { params }: { params: RouteParams }
+  { params }: { params: Promise<{ bin: string }> }
 ) {
   const { bin } = await params;
 

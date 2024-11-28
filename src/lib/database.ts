@@ -8,7 +8,7 @@ const dialect = new PostgresDialect({
     password: process.env.POSTGRES_PASSWORD,
     host: process.env.POSTGRES_HOST,
     user: process.env.POSTGRES_USER,
-    port: process.env.POSTGRES_PORT,
+    port: process.env.POSTGRES_PORT ? +process.env.POSTGRES_PORT : 6543,
     max: 10,
   }),
 });
